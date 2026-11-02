@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>התיק שלי 🚀</title>
+<style>
+  :root{
+    --bg1:#e8f6ff; --bg2:#fff6e0; --ink:#23324a; --muted:#6b7a90;
+    --green:#1faa59; --green-bg:#e3f8ec; --red:#e5484d; --red-bg:#ffe9ea; --card:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:20px 14px 40px;font-family:"Segoe UI","Rubik","Heebo",Arial,sans-serif;color:var(--ink);
+       background:linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh}
+  .wrap{max-width:900px;margin:0 auto}
+  header{text-align:center;margin-bottom:14px}
+  header h1{margin:0;font-size:clamp(28px,6vw,44px)}
+  header p{margin:6px 0 0;color:var(--muted);font-size:16px}
+
+  /* refresh bar */
+  .refresh{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+  #refreshBtn{
+    font:inherit;font-size:18px;font-weight:800;color:#fff;border:0;cursor:pointer;
+    background:linear-gradient(135deg,#f59e0b,#f97316);padding:12px 24px;border-radius:999px;
+    box-shadow:0 6px 16px rgba(249,115,22,.35);display:inline-flex;align-items:center;gap:8px
+  }
+  #refreshBtn:active{transform:scale(.97)}
+  #refreshBtn:disabled{opacity:.7;cursor:wait}
+  #refreshBtn .ic{display:inline-block}
+  #refreshBtn.loading .ic{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #status{font-size:14px;color:var(--muted);min-height:20px}
+  #status.ok{color:var(--green);font-weight:700}
+  #status.warn{color:#b45309;font-weight:700}
+
+  .hero{background:linear-gradient(135deg,#4f46e5,#3b82f6 60%,#22d3ee);color:#fff;border-radius:28px;padding:26px 22px;
+    box-shadow:0 12px 30px rgba(59,130,246,.35);text-align:center;position:relative;overflow:hidden}
+  .hero::after{content:"⭐";position:absolute;font-size:90px;opacity:.12;left:12px;top:-6px;transform:rotate(-15deg)}
+  .hero::before{content:"💰";position:absolute;font-size:90px;opacity:.12;right:12px;bottom:-14px;transform:rotate(12deg)}
+  .hero .label{font-size:20px;opacity:.95}
+  .hero .total{font-size:clamp(42px,11vw,76px);font-weight:800;line-height:1.1;margin:4px 0 14px}
+  .hero-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .pill{background:rgba(255,255,255,.2);border-radius:18px;padding:10px 18px;min-width:150px}
+  .pill .k{font-size:14px;opacity:.9}.pill .v{font-size:24px;font-weight:700}
+  .pill.profit.up{background:var(--green)}.pill.profit.down{background:var(--red)}
+  .message{margin-top:14px;font-size:20px;font-weight:600}
+
+  h2{font-size:24px;margin:30px 4px 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{background:var(--card);border-radius:24px;padding:18px;box-shadow:0 6px 18px rgba(35,50,74,.08);
+    border-top:8px solid var(--c);display:flex;flex-direction:column;gap:10px}
+  .card .top{display:flex;align-items:center;gap:12px}
+  .card .emoji{font-size:38px;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--cbg);flex:none}
+  .card .name{font-size:21px;font-weight:800;line-height:1.15}
+  .card .desc{font-size:14px;color:var(--muted)}
+  .card .value{font-size:34px;font-weight:800}
+  .card .value small{font-size:15px;font-weight:600;color:var(--muted);margin-inline-start:6px}
+  .gain{border-radius:16px;padding:10px 14px;font-weight:800;font-size:20px;display:flex;justify-content:space-between;align-items:center}
+  .gain.up{background:var(--green-bg);color:var(--green)}.gain.down{background:var(--red-bg);color:var(--red)}
+  .gain .pct{font-size:17px}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px}
+  .facts div{background:#f4f7fb;border-radius:12px;padding:8px 10px}
+  .facts b{display:block;font-size:16px}.facts span{color:var(--muted);font-size:12px}
+  .bars{display:flex;flex-direction:column;gap:6px}
+  .bar-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .bar-row .t{width:70px;flex:none}
+  .bar{flex:1;background:#eef2f7;border-radius:10px;height:16px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:10px}
+  .bar.paid i{background:#b6c2d4}.bar.now i{background:var(--c)}
+
+  .alloc{background:var(--card);border-radius:24px;padding:20px;box-shadow:0 6px 18px rgba(35,50,74,.08);
+    display:flex;gap:26px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .donut{width:200px;height:200px;border-radius:50%;position:relative;flex:none}
+  .donut::after{content:"איפה הכסף שלי?";position:absolute;inset:34px;border-radius:50%;background:#fff;display:flex;
+    align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:15px;padding:10px}
+  .legend{display:flex;flex-direction:column;gap:10px;font-size:18px}
+  .legend div{display:flex;align-items:center;gap:10px}
+  .legend .dot{width:18px;height:18px;border-radius:50%;flex:none}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 6px 18px rgba(35,50,74,.08);font-size:16px}
+  th,td{padding:12px 10px;text-align:center}
+  th{background:#eef4ff;font-size:14px;color:var(--muted)}
+  tr+tr td{border-top:1px solid #edf1f7}
+  td.l,th.l{text-align:start;font-weight:700}
+  tfoot td{background:#f8fafc;font-weight:800}
+  .pos{color:var(--green);font-weight:800}.neg{color:var(--red);font-weight:800}
+  .table-wrap{overflow-x:auto}
+  footer{margin-top:26px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>התיק שלי 🚀</h1>
+    <p>כאן רואים איך הכסף שלי גדל</p>
+  </header>
+
+  <div class="refresh">
+    <button id="refreshBtn" type="button"><span class="ic">🔄</span><span class="txt">רענן מחירים</span></button>
+    <div id="status" role="status" aria-live="polite"></div>
+  </div>
+
+  <div id="app">
+  <section class="hero">
+    <div class="label">כמה כסף יש לי עכשיו?</div>
+    <div class="total">‏1,291.47&nbsp;‏₪</div>
+    <div class="hero-row">
+      <div class="pill"><div class="k">שמתי בהשקעות</div><div class="v">‏1,181.08&nbsp;‏₪</div></div>
+      <div class="pill profit up"><div class="k">הרווח שלי</div><div class="v"><bdi dir="ltr">+‏110.39&nbsp;‏₪</bdi> (<bdi dir="ltr">+9.3%</bdi>)</div></div>
+    </div>
+    <div class="message">וואו! הכסף שלי גדל 🎉</div>
+  </section>
+  <h2>🧸 ההשקעות שלי</h2>
+  <section class="grid">
+  <article class="card" style="--c:#3b82f6;--cbg:#e6f0ff">
+    <div class="top"><div class="emoji">🇺🇸</div>
+      <div><div class="name">500 החברות הגדולות באמריקה</div><div class="desc">INVESCO S&amp;P 500 · קרן סל · 1183441</div></div></div>
+    <div class="value">‏433.44&nbsp;‏₪<small>שווה היום</small></div>
+    <div class="gain up"><span>📈 רווח: <bdi dir="ltr">+‏39.24&nbsp;‏₪</bdi></span><span class="pct"><bdi dir="ltr">+10.0%</bdi></span></div>
+    <div class="bars">
+      <div class="bar-row"><span class="t">שילמתי</span><div class="bar paid"><i style="width:68.6305233469132%"></i></div></div>
+      <div class="bar-row"><span class="t">שווה היום</span><div class="bar now"><i style="width:75.46223754308993%"></i></div></div>
+    </div>
+    <div class="facts">
+      <div><span>כמה יחידות יש לי</span><b>9</b></div>
+      <div><span>קניתי ב־</span><b>‏43.80&nbsp;‏₪</b></div>
+      <div><span>המחיר (מ־02/11/2026)</span><b>‏48.16&nbsp;‏₪</b></div>
+      <div><span>שילמתי בסך הכול</span><b>‏394.20&nbsp;‏₪</b></div>
+    </div>
+  </article>
+  <article class="card" style="--c:#8b5cf6;--cbg:#efe9ff">
+    <div class="top"><div class="emoji">💻</div>
+      <div><div class="name">חברות הטכנולוגיה הגדולות</div><div class="desc">INVESCO NASDAQ-100 · קרן סל · 1186063</div></div></div>
+    <div class="value">‏563.20&nbsp;‏₪<small>שווה היום</small></div>
+    <div class="gain down"><span>📉 רווח: <bdi dir="ltr">−‏11.18&nbsp;‏₪</bdi></span><span class="pct"><bdi dir="ltr">−1.9%</bdi></span></div>
+    <div class="bars">
+      <div class="bar-row"><span class="t">שילמתי</span><div class="bar paid"><i style="width:100%"></i></div></div>
+      <div class="bar-row"><span class="t">שווה היום</span><div class="bar now"><i style="width:98.05355339670602%"></i></div></div>
+    </div>
+    <div class="facts">
+      <div><span>כמה יחידות יש לי</span><b>2</b></div>
+      <div><span>קניתי ב־</span><b>‏287.19&nbsp;‏₪</b></div>
+      <div><span>המחיר (מ־02/11/2026)</span><b>‏281.60&nbsp;‏₪</b></div>
+      <div><span>שילמתי בסך הכול</span><b>‏574.38&nbsp;‏₪</b></div>
+    </div>
+  </article>
+  <article class="card" style="--c:#f59e0b;--cbg:#fff2d9">
+    <div class="top"><div class="emoji">🇮🇱</div>
+      <div><div class="name">125 החברות הגדולות בישראל</div><div class="desc">תכלית TTF ת״א 125 · קרן נאמנות · 5114657</div></div></div>
+    <div class="value">‏294.83&nbsp;‏₪<small>שווה היום</small></div>
+    <div class="gain up"><span>📈 רווח: <bdi dir="ltr">+‏82.33&nbsp;‏₪</bdi></span><span class="pct"><bdi dir="ltr">+38.7%</bdi></span></div>
+    <div class="bars">
+      <div class="bar-row"><span class="t">שילמתי</span><div class="bar paid"><i style="width:36.996413524147776%"></i></div></div>
+      <div class="bar-row"><span class="t">שווה היום</span><div class="bar now"><i style="width:51.330303979943594%"></i></div></div>
+    </div>
+    <div class="facts">
+      <div><span>כמה יחידות יש לי</span><b>85</b></div>
+      <div><span>קניתי ב־</span><b>‏2.50&nbsp;‏₪</b></div>
+      <div><span>המחיר (מ־30/10/2026)</span><b>‏3.47&nbsp;‏₪</b></div>
+      <div><span>שילמתי בסך הכול</span><b>‏212.50&nbsp;‏₪</b></div>
+    </div>
+  </article></section>
+  <h2>🍕 איפה הכסף שלי?</h2>
+  <section class="alloc"><div class="donut" style="background:conic-gradient(#3b82f6 0.00% 33.56%, #8b5cf6 33.56% 77.17%, #f59e0b 77.17% 100.00%)"></div><div class="legend"><div><span class="dot" style="background:#3b82f6"></span>🇺🇸 500 החברות הגדולות באמריקה · <b>34%</b></div><div><span class="dot" style="background:#8b5cf6"></span>💻 חברות הטכנולוגיה הגדולות · <b>44%</b></div><div><span class="dot" style="background:#f59e0b"></span>🇮🇱 125 החברות הגדולות בישראל · <b>23%</b></div></div></section>
+  <h2>📋 הכול בטבלה אחת</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="l">השקעה</th><th>כמות</th><th>קניתי ב־</th><th>שווה היום</th><th>שילמתי</th><th>שווי</th><th>רווח</th></tr></thead>
+    <tbody><tr><td class="l">🇺🇸 500 החברות הגדולות באמריקה</td><td>9</td><td>‏43.80&nbsp;‏₪</td><td>‏48.16&nbsp;‏₪</td><td>‏394.20&nbsp;‏₪</td><td>‏433.44&nbsp;‏₪</td><td class="pos"><bdi dir="ltr">+‏39.24&nbsp;‏₪</bdi><br><small><bdi dir="ltr">+10.0%</bdi></small></td></tr><tr><td class="l">💻 חברות הטכנולוגיה הגדולות</td><td>2</td><td>‏287.19&nbsp;‏₪</td><td>‏281.60&nbsp;‏₪</td><td>‏574.38&nbsp;‏₪</td><td>‏563.20&nbsp;‏₪</td><td class="neg"><bdi dir="ltr">−‏11.18&nbsp;‏₪</bdi><br><small><bdi dir="ltr">−1.9%</bdi></small></td></tr><tr><td class="l">🇮🇱 125 החברות הגדולות בישראל</td><td>85</td><td>‏2.50&nbsp;‏₪</td><td>‏3.47&nbsp;‏₪</td><td>‏212.50&nbsp;‏₪</td><td>‏294.83&nbsp;‏₪</td><td class="pos"><bdi dir="ltr">+‏82.33&nbsp;‏₪</bdi><br><small><bdi dir="ltr">+38.7%</bdi></small></td></tr></tbody>
+    <tfoot><tr><td class="l" colspan="4">סך הכול</td><td>‏1,181.08&nbsp;‏₪</td><td>‏1,291.47&nbsp;‏₪</td><td class="pos"><bdi dir="ltr">+‏110.39&nbsp;‏₪</bdi><br><small><bdi dir="ltr">+9.3%</bdi></small></td></tr></tfoot>
+  </table></div></div>
+
+  <footer>
+    המחירים נלקחים מאתרי הבורסה והמידע הפיננסי, ויכולים להיות מושהים או שונים מעט מהמחיר בבנק.<br>
+    זהו דף לימוד והמחשה, ולא ייעוץ השקעות.
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   ✏️  נתוני ההשקעות (כמות, מחיר קנייה). המחירים בשקלים.
+   המחירים העדכניים נטענים מהקובץ prices.json
+   ============================================================ */
+const HOLDINGS = [
+  { id:"1183441", nick:"500 החברות הגדולות באמריקה", official:"INVESCO S&P 500 · קרן סל",
+    emoji:"🇺🇸", color:"#3b82f6", bg:"#e6f0ff", qty:9,  buyPrice:43.8,   price:48.16,  asOf:"02/11/2026" },
+  { id:"1186063", nick:"חברות הטכנולוגיה הגדולות", official:"INVESCO NASDAQ-100 · קרן סל",
+    emoji:"💻", color:"#8b5cf6", bg:"#efe9ff", qty:2,  buyPrice:287.19, price:281.60, asOf:"02/11/2026" },
+  { id:"5114657", nick:"125 החברות הגדולות בישראל", official:"תכלית TTF ת״א 125 · קרן נאמנות",
+    emoji:"🇮🇱", color:"#f59e0b", bg:"#fff2d9", qty:85, buyPrice:2.5,    price:3.4686, asOf:"30/10/2026" }
+];
+const PRICES_URL = "prices.json";
+const AUTO_REFRESH_MS = 15 * 60 * 1000;   // רענון אוטומטי כל 15 דקות כשהדף פתוח
+
+let lastUpdated = "02/11/2026 17:30";
+
+const nis  = n => n.toLocaleString("he-IL",{style:"currency",currency:"ILS",minimumFractionDigits:2,maximumFractionDigits:2});
+const sign = n => `<bdi dir="ltr">${n>0?"+":n<0?"−":""}${nis(Math.abs(n))}</bdi>`;
+const pct  = n => `<bdi dir="ltr">${n>0?"+":n<0?"−":""}${Math.abs(n).toFixed(1)}%</bdi>`;
+
+function render(){
+  HOLDINGS.forEach(h=>{ h.cost=h.qty*h.buyPrice; h.value=h.qty*h.price; h.profit=h.value-h.cost; h.pct=h.profit/h.cost*100; });
+  const C=HOLDINGS.reduce((s,h)=>s+h.cost,0), V=HOLDINGS.reduce((s,h)=>s+h.value,0), P=V-C, PP=P/C*100, up=P>=0;
+  const maxMoney=Math.max(...HOLDINGS.map(h=>Math.max(h.cost,h.value)));
+
+  const cards = HOLDINGS.map(h=>{ const u=h.profit>=0; return `
+  <article class="card" style="--c:${h.color};--cbg:${h.bg}">
+    <div class="top"><div class="emoji">${h.emoji}</div>
+      <div><div class="name">${h.nick}</div><div class="desc">${h.official} · ${h.id}</div></div></div>
+    <div class="value">${nis(h.value)}<small>שווה היום</small></div>
+    <div class="gain ${u?"up":"down"}"><span>${u?"📈":"📉"} רווח: ${sign(h.profit)}</span><span class="pct">${pct(h.pct)}</span></div>
+    <div class="bars">
+      <div class="bar-row"><span class="t">שילמתי</span><div class="bar paid"><i style="width:${h.cost/maxMoney*100}%"></i></div></div>
+      <div class="bar-row"><span class="t">שווה היום</span><div class="bar now"><i style="width:${h.value/maxMoney*100}%"></i></div></div>
+    </div>
+    <div class="facts">
+      <div><span>כמה יחידות יש לי</span><b>${h.qty}</b></div>
+      <div><span>קניתי ב־</span><b>${nis(h.buyPrice)}</b></div>
+      <div><span>המחיר (מ־${h.asOf})</span><b>${nis(h.price)}</b></div>
+      <div><span>שילמתי בסך הכול</span><b>${nis(h.cost)}</b></div>
+    </div>
+  </article>`}).join("");
+
+  let acc=0;
+  const stops=HOLDINGS.map(h=>{const s=acc/V*100;acc+=h.value;return `${h.color} ${s.toFixed(2)}% ${(acc/V*100).toFixed(2)}%`}).join(", ");
+  const legend=HOLDINGS.map(h=>`<div><span class="dot" style="background:${h.color}"></span>${h.emoji} ${h.nick} · <b>${(h.value/V*100).toFixed(0)}%</b></div>`).join("");
+  const rows=HOLDINGS.map(h=>`<tr><td class="l">${h.emoji} ${h.nick}</td><td>${h.qty}</td><td>${nis(h.buyPrice)}</td><td>${nis(h.price)}</td><td>${nis(h.cost)}</td><td>${nis(h.value)}</td><td class="${h.profit>=0?"pos":"neg"}">${sign(h.profit)}<br><small>${pct(h.pct)}</small></td></tr>`).join("");
+
+  document.getElementById("app").innerHTML = `
+  <section class="hero">
+    <div class="label">כמה כסף יש לי עכשיו?</div>
+    <div class="total">${nis(V)}</div>
+    <div class="hero-row">
+      <div class="pill"><div class="k">שמתי בהשקעות</div><div class="v">${nis(C)}</div></div>
+      <div class="pill profit ${up?"up":"down"}"><div class="k">הרווח שלי</div><div class="v">${sign(P)} (${pct(PP)})</div></div>
+    </div>
+    <div class="message">${up?"וואו! הכסף שלי גדל 🎉":"קצת ירידה עכשיו, זה קורה. סבלנות משתלמת 💪"}</div>
+  </section>
+  <h2>🧸 ההשקעות שלי</h2>
+  <section class="grid">${cards}</section>
+  <h2>🍕 איפה הכסף שלי?</h2>
+  <section class="alloc"><div class="donut" style="background:conic-gradient(${stops})"></div><div class="legend">${legend}</div></section>
+  <h2>📋 הכול בטבלה אחת</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="l">השקעה</th><th>כמות</th><th>קניתי ב־</th><th>שווה היום</th><th>שילמתי</th><th>שווי</th><th>רווח</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><td class="l" colspan="4">סך הכול</td><td>${nis(C)}</td><td>${nis(V)}</td><td class="${up?"pos":"neg"}">${sign(P)}<br><small>${pct(PP)}</small></td></tr></tfoot>
+  </table></div>`;
+}
+
+const statusEl = document.getElementById("status");
+const btn = document.getElementById("refreshBtn");
+function setStatus(text, cls){ statusEl.textContent = text; statusEl.className = cls||""; }
+function showLast(prefix){ setStatus(`${prefix||""}עודכן לאחרונה: ${lastUpdated}`, prefix ? "ok" : ""); }
+
+function fmtDate(iso){
+  const d = new Date(iso); if (isNaN(d)) return null;
+  return d.toLocaleString("he-IL",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Jerusalem"}).replace(",", "");
+}
+
+async function refresh(manual){
+  if (location.protocol === "file:") {
+    if (manual) setStatus("הרענון עובד רק כשהדף פתוח מכתובת אינטרנט (לא כקובץ מהמחשב).", "warn");
+    return;
+  }
+  btn.disabled = true; btn.classList.add("loading");
+  if (manual) setStatus("מרענן…");
+  try {
+    const res = await fetch(`${PRICES_URL}?t=${Date.now()}`, {cache:"no-store"});
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    let changed = false;
+    HOLDINGS.forEach(h=>{
+      const p = data.prices && data.prices[h.id];
+      if (p && typeof p.price === "number" && p.price > 0) {
+        if (p.price !== h.price) changed = true;
+        h.price = p.price; if (p.asOf) h.asOf = p.asOf;
+      }
+    });
+    const f = fmtDate(data.updated); if (f) lastUpdated = f;
+    render();
+    showLast(manual ? (changed ? "✅ המחירים התעדכנו · " : "✅ המחירים כבר מעודכנים · ") : "");
+  } catch (e) {
+    setStatus(`לא הצלחתי לרענן עכשיו, מוצגים המחירים האחרונים (${lastUpdated}).`, "warn");
+  } finally {
+    btn.disabled = false; btn.classList.remove("loading");
+  }
+}
+
+btn.addEventListener("click", ()=>refresh(true));
+render();
+showLast();
+refresh(false);
+setInterval(()=>refresh(false), AUTO_REFRESH_MS);
+document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) refresh(false); });
+</script>
+</body>
+</html>
